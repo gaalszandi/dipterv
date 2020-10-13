@@ -22,6 +22,9 @@ from absl import flags
 
 import tensorflow.compat.v1 as tf
 
+import shutil as sh
+import os
+
 from object_detection import model_hparams
 from object_detection import model_lib
 
@@ -117,9 +120,13 @@ def main(unused_argv):
             eval_interval_secs=eval_interval_secs,
             eval_on_train_data=False)
 
+        if not os.path.exists(FLAGS.model_dir):
+            os.makedirs(FLAGS.model_dir)
+        # copy config file
+        sh.copyfile(FLAGS.pipeline_config_path, f'{FLAGS.model_dir}/{FLAGS.pipeline_config_path.rsplit("/", 1)[1]}')
+
         # Currently only a single Eval Spec is allowed.
         tf.estimator.train_and_evaluate(estimator, train_spec, eval_specs[0])
-
 
 if __name__ == '__main__':
     tf.app.run()
